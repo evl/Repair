@@ -1,22 +1,11 @@
-local evl_Repair = CreateFrame("Frame", nil, UIParent)
+local addonName, addon = ...
+local frame = CreateFrame("Frame", nil, UIParent)
 
 local COLOR_COPPER = "eda55f"
 local COLOR_SILVER = "c7c7cf"
 local COLOR_GOLD = "ffd700"
 
-function evl_Repair:onEvent()
-  if CanMerchantRepair() then
-	  local cost = GetRepairAllCost()
-		local money = GetMoney()
-
-		if cost > 0 then
-			RepairAllItems(CanGuildBankRepair() and 1 or 0)
-			DEFAULT_CHAT_FRAME:AddMessage(string.format("Repair costs: %s", self:formatMoney(math.min(cost, money))))
-		end
-	end
-end
-
-function evl_Repair:formatMoney(value)
+local formatMoney = function(value)
 	local gold = value / 10000
 	local silver = mod(value / 100, 100)
 	local copper = mod(value, 100)
@@ -30,9 +19,18 @@ function evl_Repair:formatMoney(value)
 	end
 end
 
-function evl_Repair:new()
-	self:SetScript("OnEvent", self.onEvent)
-	self:RegisterEvent("MERCHANT_SHOW")
+local onEvent = function(self)
+  if CanMerchantRepair() then
+	  local cost = GetRepairAllCost()
+		local money = GetMoney()
+
+		if cost > 0 then
+			RepairAllItems(CanGuildBankRepair() and 1 or 0)
+			DEFAULT_CHAT_FRAME:AddMessage(string.format("Repair costs: %s", formatMoney(math.min(cost, money))))
+		end
+	end
 end
 
-evl_Repair:new()
+frame:SetScript("OnEvent", onEvent)
+
+frame:RegisterEvent("MERCHANT_SHOW")
